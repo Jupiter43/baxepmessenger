@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Baxep Messenger</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Arial', sans-serif;
+      background-color: #121212;
+      color: #fff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* Окно для входа */
+    .container {
+      max-width: 900px;
+      width: 100%;
+      padding: 20px;
+      background: #1f1f1f;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+      text-align: center;
+    }
+
+    .header {
+      margin-bottom: 20px;
+    }
+
+    .input-area {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    input[type="text"], input[type="password"] {
+      padding: 10px;
+      background: #2a2a2a;
+      color: #fff;
+      border: none;
+      margin: 10px 0;
+      border-radius: 5px;
+      width: 80%;
+    }
+
+    button {
+      background: #333;
+      color: #fff;
+      padding: 12px 20px;
+      border: none;
+      cursor: pointer;
+      font-size: 14px;
+      border-radius: 5px;
+      margin-top: 10px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    }
+
+    button:hover {
+      background: #444;
+    }
+
+    /* Стиль чата */
+    .chat-container {
+      display: none;
+      background: #1f1f1f;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+      width: 100%;
+      max-width: 900px;
+      padding: 20px;
+      overflow: hidden;
+    }
+
+    .chat-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+      padding: 10px;
+      background: #333;
+      border-radius: 8px;
+    }
+
+    .avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      object-fit: cover;
+      margin-right: 10px;
+    }
+
+    .status {
+      font-size: 12px;
+      color: #7d7d7d;
+    }
+
+    .message {
+      padding: 10px;
+      margin: 10px 0;
+      border-radius: 10px;
+    }
+
+    .message.user {
+      background: #444;
+      color: #fff;
+    }
+
+    .message.bot {
+      background: #3498db;
+      color: #fff;
+    }
+
+    .input-container {
+      display: flex;
+      align-items: center;
+    }
+
+    .input-container input {
+      padding: 12px;
+      background: #333;
+      color: #fff;
+      border: none;
+      flex-grow: 1;
+      border-radius: 5px;
+    }
+
+    .input-container button {
+      background: #444;
+      color: #fff;
+      padding: 12px;
+      border: none;
+      cursor: pointer;
+      border-radius: 5px;
+      margin-left: 10px;
+    }
+
+    .user-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .user-bar img {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      margin-right: 10px;
+    }
+
+    /* Блокировка */
+    .blocked {
+      display: none;
+      text-align: center;
+      background: #333;
+      color: #fff;
+      padding: 30px;
+      border-radius: 10px;
+      border: 3px solid red;
+      width: 50%;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+    }
+
+    .blocked h2 {
+      margin-bottom: 20px;
+    }
+
+    .blocked p {
+      margin-bottom: 20px;
+    }
+
+    /* Круглая аватарка с буквой A для admin */
+    .avatar-admin {
+      width: 40px;
+      height: 40px;
+      background-color: #3498db;
+      color: #fff;
+      font-size: 18px;
+      font-weight: bold;
+      text-align: center;
+      line-height: 40px;
+      border-radius: 50%;
+    }
+  </style>
+</head>
+<body>
+  <!-- Окно входа -->
+  <div id="login" class="container">
+    <h2>Добро пожаловать в Baxep Messenger!</h2>
+    <div class="input-area">
+      <input type="text" id="username" placeholder="Логин" />
+      <input type="password" id="password" placeholder="Пароль" />
+      <button onclick="login()">Войти</button>
+    </div>
+    <div id="loginError" style="color: red;"></div>
+    <p>BAXEPSOFT 2024–2025</p>
+  </div>
+
+  <!-- Чат -->
+  <div id="chat" class="chat-container">
+    <div class="user-bar">
+      <div style="display: flex; align-items: center;">
+        <div id="userAvatar" class="avatar-admin">A</div>
+        <strong id="currentUser">User</strong>
+      </div>
+      <button onclick="logout()">Выйти</button>
+    </div>
+
+    <div class="chat-header">
+      <div style="display: flex; align-items: center;">
+        <img class="avatar" src="https://enterfind.wordpress.com/wp-content/uploads/2013/05/windows8_account_picture.png" alt="Bot Avatar">
+        <div>
+          <strong>Apel <span class="status">BOT</span></strong>
+        </div>
+      </div>
+    </div>
+
+    <div id="chatWindow" class="chat-window"></div>
+
+    <div class="input-container">
+      <input type="text" id="userInput" placeholder="Введите сообщение..." onkeypress="handleKey(event)" />
+      <button onclick="sendMessage()">Отправить</button>
+    </div>
+  </div>
+
+  <!-- Блокировка -->
+  <div id="blocked" class="blocked">
+    <h2>Упс.. вас заблокировали!</h2>
+    <p>Ваша учетная запись заблокирована.<br>Причина: Оскорбление бота.</p>
+    <button onclick="window.close()">Выйти с сайта</button>
+  </div>
+
+  <script>
+    const users = {
+      admin: {
+        password: '123',
+        avatar: 'https://via.placeholder.com/40?text=A'
+      },
+      user: {
+        password: '456',
+        avatar: 'https://enterfind.wordpress.com/wp-content/uploads/2013/05/windows8_account_picture.png'
+      }
+    };
+
+    const jokes = [
+      "Как называют кота, который сдает экзамен? Кот-экзаменатор!",
+      "Почему программисты не могут засыпать? Потому что они боятся багов во сне!",
+      "В аптеке: — У вас есть что-то от усталости? — Да, отпуск.",
+      "Жена: Ты меня не слушаешь! Муж: А ты что-то говорила?"
+    ];
+
+    let currentUser = '';
+    let isBlocked = false;
+
+    function login() {
+      const username = document.getElementById('username').value.toLowerCase();
+      const password = document.getElementById('password').value;
+
+      if (users[username] && users[username].password === password) {
+        currentUser = username;
+        document.getElementById('userAvatar').classList.add('avatar-admin');  // Admin аватарка с буквой A
+        document.getElementById('currentUser').innerText = username;
+        document.getElementById('login').style.display = 'none';
+        document.getElementById('chat').style.display = 'block';
+      } else {
+        document.getElementById('loginError').innerText = 'Неверный логин или пароль';
+      }
+    }
+
+    function logout() {
+      location.reload();
+    }
+
+    function handleKey(e) {
+      if (e.key === 'Enter') {
+        sendMessage();
+      }
+    }
+
+    function sendMessage() {
+      if (isBlocked) return;
+
+      const input = document.getElementById('userInput');
+      const msg = input.value.trim();
+      if (!msg) return;
+      appendMessage(`Вы: ${msg}`, 'user');
+      input.value = '';
+
+      const offensiveWords = ["ты лох", "ты дебил", "ты идиот", "иди в жопу", "иди в баню"];
+      if (offensiveWords.includes(msg.toLowerCase())) {
+        isBlocked = true;
+        document.getElementById('chat').style.display = 'none';
+        document.getElementById('blocked').style.display = 'block';
+        return;
+      }
+
+      setTimeout(() => {
+        let response = "Извините, я вас не понял.";
+
+        if (["привет", "здарова", "дарова", "ку", "Ку"].includes(msg.toLowerCase())) {
+          response = `Привет, ${currentUser}! Чем могу помочь?`;
+        } else if (msg.toLowerCase().includes("расскажи анекдот")) {
+          response = jokes[Math.floor(Math.random() * jokes.length)];
+        }
+
+        appendMessage(response, 'bot');
+      }, 1000);
+    }
+
+    function appendMessage(message, type) {
+      const div = document.createElement('div');
+      div.className = 'message ' + type;
+      div.innerText = message;
+      document.getElementById('chatWindow').appendChild(div);
+      document.getElementById('chatWindow').scrollTop = document.getElementById('chatWindow').scrollHeight;
+    }
+  </script>
+</body>
+</html>
