@@ -230,9 +230,8 @@
   <div id="login" class="container">
     <h2>Добро пожаловать в Baxep Messenger!</h2>
     <div class="input-area">
-      <input type="text" id="username" placeholder="Логин" />
-      <input type="password" id="password" placeholder="Пароль" />
-      <button onclick="login()">Войти</button>
+      <input type="text" id="username" placeholder="Введите имя пользователя" />
+      <button onclick="login()">Войти как временный пользователь</button>
     </div>
     <div id="loginError" style="color: red;"></div>
     <p>BAXEPSOFT 2024–2025</p>
@@ -278,17 +277,10 @@
   </div>
 
   <script>
-    const users = {
-      admin: {
-        password: '123',
-        avatar: 'https://via.placeholder.com/40?text=A'
-      },
-      user: {
-        password: '456',
-        avatar: 'https://enterfind.wordpress.com/wp-content/uploads/2013/05/windows8_account_picture.png'
-      }
-    };
-
+    let currentUser = '';
+    let isBlocked = false;
+    let temporaryUserName = '';
+    
     const jokes = [
       "Как называют кота, который сдает экзамен? Кот-экзаменатор!",
       "Почему программисты не могут засыпать? Потому что они боятся багов во сне!",
@@ -296,75 +288,22 @@
       "Жена: Ты меня не слушаешь! Муж: А ты что-то говорила?"
     ];
 
-    let currentUser = '';
-    let isBlocked = false;
-
+    // Логика для входа временного пользователя
     function login() {
-      const username = document.getElementById('username').value.toLowerCase();
-      const password = document.getElementById('password').value;
+      const username = document.getElementById('username').value.trim();
 
-      if (users[username] && users[username].password === password) {
-        currentUser = username;
-        document.getElementById('userAvatar').classList.add('avatar-admin');  // Admin аватарка с буквой A
-        document.getElementById('currentUser').innerText = username;
-        document.getElementById('login').style.display = 'none';
-        document.getElementById('chat').style.display = 'block';
-      } else {
-        document.getElementById('loginError').innerText = 'Неверный логин или пароль';
-      }
-    }
-
-    function logout() {
-      location.reload();
-    }
-
-    function handleKey(e) {
-      if (e.key === 'Enter') {
-        sendMessage();
-      }
-    }
-
-    function sendMessage() {
-      if (isBlocked) return;
-
-      const input = document.getElementById('userInput');
-      const msg = input.value.trim();
-      if (!msg) return;
-      appendMessage(`Вы: ${msg}`, 'user');
-      input.value = '';
-
-      const offensiveWords = ["ты лох", "ты дебил", "ты идиот", "иди в жопу", "иди в баню"];
-      if (offensiveWords.includes(msg.toLowerCase())) {
-        isBlocked = true;
-        document.getElementById('chat').style.display = 'none';
-        document.getElementById('blocked').style.display = 'block';
+      if (!username) {
+        document.getElementById('loginError').innerText = 'Введите имя пользователя!';
         return;
       }
 
+      temporaryUserName = username;
+      currentUser = username;
+      document.getElementById('userAvatar').classList.add('avatar-admin'); // Аватарка для временного пользователя
+      document.getElementById('currentUser').innerText = username;
+      document.getElementById('login').style.display = 'none';
+      document.getElementById('chat').style.display = 'block';
+
+      // Удалить временного пользователя через 10 минут (600000 ms)
       setTimeout(() => {
-        let response = "Извините, я вас не понял.";
 
-        if (["привет", "здарова", "дарова", "ку", "Ку"].includes(msg.toLowerCase())) {
-          response = `Привет, ${currentUser}! Чем могу помочь?`;
-        } else if (msg.toLowerCase().includes("расскажи анекдот")) {
-          response = jokes[Math.floor(Math.random() * jokes.length)];
-        }
-
-        appendMessage(response, 'bot');
-      }, 1000);
-    }
-
-    function appendMessage(message, type) {
-      const div = document.createElement('div');
-      div.className = 'message ' + type;
-      div.innerText = message;
-      document.getElementById('chatWindow').appendChild(div);
-      document.getElementById('chatWindow').scrollTop = document.getElementById('chatWindow').scrollHeight;
-    }
-
-    function closeNotification() {
-      document.getElementById('notification').style.display = 'none';
-    }
-  </script>
-</body>
-</html>
