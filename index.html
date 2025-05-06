@@ -153,40 +153,6 @@
       margin-right: 10px;
     }
 
-    /* Блокировка */
-    .blocked {
-      display: none;
-      text-align: center;
-      background: #333;
-      color: #fff;
-      padding: 30px;
-      border-radius: 10px;
-      border: 3px solid red;
-      width: 50%;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
-    }
-
-    .blocked h2 {
-      margin-bottom: 20px;
-    }
-
-    .blocked p {
-      margin-bottom: 20px;
-    }
-
-    /* Круглая аватарка с буквой A для admin */
-    .avatar-admin {
-      width: 40px;
-      height: 40px;
-      background-color: #3498db;
-      color: #fff;
-      font-size: 18px;
-      font-weight: bold;
-      text-align: center;
-      line-height: 40px;
-      border-radius: 50%;
-    }
-
     /* Красное окно с уведомлением */
     .notification {
       background-color: #e74c3c;
@@ -218,6 +184,18 @@
       border-radius: 5px;
     }
 
+    .temp-avatar {
+      width: 40px;
+      height: 40px;
+      background-color: #3498db;
+      color: #fff;
+      font-size: 18px;
+      font-weight: bold;
+      text-align: center;
+      line-height: 40px;
+      border-radius: 50%;
+      margin-right: 10px;
+    }
   </style>
 </head>
 <body>
@@ -230,8 +208,7 @@
   <div id="login" class="container">
     <h2>Добро пожаловать в Baxep Messenger!</h2>
     <div class="input-area">
-      <input type="text" id="username" placeholder="Введите имя пользователя" />
-      <button onclick="login()">Войти как временный пользователь</button>
+      <button onclick="registerTemporaryUser()">Зарегистрировать временного пользователя</button>
     </div>
     <div id="loginError" style="color: red;"></div>
     <p>BAXEPSOFT 2024–2025</p>
@@ -241,8 +218,8 @@
   <div id="chat" class="chat-container">
     <div class="user-bar">
       <div style="display: flex; align-items: center;">
-        <div id="userAvatar" class="avatar-admin">A</div>
-        <strong id="currentUser">User</strong>
+        <div id="userAvatar" class="temp-avatar">T</div>
+        <strong id="currentUser">Временный пользователь</strong>
       </div>
       <button onclick="logout()">Выйти</button>
     </div>
@@ -269,17 +246,9 @@
     </div>
   </div>
 
-  <!-- Блокировка -->
-  <div id="blocked" class="blocked">
-    <h2>Упс.. вас заблокировали!</h2>
-    <p>Ваша учетная запись заблокирована.<br>Причина: Оскорбление бота.</p>
-    <button onclick="window.close()">Выйти с сайта</button>
-  </div>
-
   <script>
     let currentUser = '';
     let isBlocked = false;
-    let temporaryUserName = '';
     
     const jokes = [
       "Как называют кота, который сдает экзамен? Кот-экзаменатор!",
@@ -288,22 +257,58 @@
       "Жена: Ты меня не слушаешь! Муж: А ты что-то говорила?"
     ];
 
-    // Логика для входа временного пользователя
-    function login() {
-      const username = document.getElementById('username').value.trim();
-
-      if (!username) {
-        document.getElementById('loginError').innerText = 'Введите имя пользователя!';
-        return;
-      }
-
-      temporaryUserName = username;
-      currentUser = username;
-      document.getElementById('userAvatar').classList.add('avatar-admin'); // Аватарка для временного пользователя
-      document.getElementById('currentUser').innerText = username;
+    // Логика для регистрации временного пользователя
+    function registerTemporaryUser() {
+      currentUser = 'Временный пользователь';
+      document.getElementById('userAvatar').classList.add('temp-avatar');
+      document.getElementById('currentUser').innerText = currentUser;
       document.getElementById('login').style.display = 'none';
       document.getElementById('chat').style.display = 'block';
+    }
 
-      // Удалить временного пользователя через 10 минут (600000 ms)
+    // Логика отправки сообщений
+    function sendMessage() {
+      const message = document.getElementById('userInput').value.trim();
+      if (!message) return;
+
+      const chatWindow = document.getElementById('chatWindow');
+      const messageElement = document.createElement('div');
+      messageElement.className = 'message user';
+      messageElement.innerText = message;
+      chatWindow.appendChild(messageElement);
+
+      document.getElementById('userInput').value = '';
+
+      // Ответ бота
       setTimeout(() => {
+        const botMessage = document.createElement('div');
+        botMessage.className = 'message bot';
+        botMessage.innerText = jokes[Math.floor(Math.random() * jokes.length)];
+        chatWindow.appendChild(botMessage);
+        chatWindow.scrollTop = chatWindow.scrollHeight; // Прокрутка вниз
+      }, 1000);
+    }
 
+    // Обработчик нажатия Enter
+    function handleKey(event) {
+      if (event.key === 'Enter') {
+        sendMessage();
+      }
+    }
+
+    // Закрытие уведомления
+    function closeNotification() {
+      document.getElementById('notification').style.display = 'none';
+    }
+
+    // Выход
+    function logout() {
+      document.getElementById('login').style.display = 'block';
+      document.getElementById('chat').style.display = 'none';
+      currentUser = '';
+      document.getElementById('currentUser').innerText = '';
+      document.getElementById('userAvatar').classList.remove('temp-avatar');
+    }
+  </script>
+</body>
+</html>
